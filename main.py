@@ -1,3 +1,6 @@
+# Created by https://github.com/PolicyPuma4
+# Repository https://github.com/PolicyPuma4/VMware-UUID-BIOS
+
 from tkinter import *
 import os
 
@@ -5,6 +8,7 @@ window = Tk()
 
 window.title("VMware UUID BIOS")
 window.geometry("600x400")
+window.minsize(300, 200)
 
 window.rowconfigure(0, weight=1)
 window.columnconfigure(0, weight=1)
@@ -23,8 +27,14 @@ listbox.grid(row=1, column=0, sticky="nsew")
 scrollbar = Scrollbar(list_frame)
 scrollbar.grid(row=1, column=1, sticky="ns")
 
+horizontal_scrollbar = Scrollbar(list_frame, orient="horizontal")
+horizontal_scrollbar.grid(row=2, column=0, sticky="ew")
+
 listbox.config(yscrollcommand=scrollbar.set)
 scrollbar.config(command=listbox.yview)
+
+listbox.config(xscrollcommand=horizontal_scrollbar.set)
+horizontal_scrollbar.config(command=listbox.xview)
 
 
 def on_select(event):
@@ -65,7 +75,7 @@ def refresh_virtual_machines():
 
 refresh_virtual_machines()
 refresh_button = Button(list_frame, text="Refresh", command=refresh_virtual_machines)
-refresh_button.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(10, 0))
+refresh_button.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(10, 0))
 
 input_frame = Frame(window)
 input_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 10))
@@ -81,7 +91,6 @@ entry.grid(row=1, column=0, sticky="ew", columnspan=2)
 
 def randomise_guid():
     import uuid
-    import re
     string = f"{uuid.uuid4()}".replace("-", "")
     string = ' '.join(string[i:i + 2] for i in range(0, len(string), 2))
     string = f"{string[:len(string) // 2]}-{string[(len(string) // 2) + 1:]}"
