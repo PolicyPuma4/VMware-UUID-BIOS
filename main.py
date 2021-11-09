@@ -90,7 +90,7 @@ def randomise_guid():
     return
 
 
-randomise_button = Button(input_frame, text="Randomise", command=randomise_guid)
+randomise_button = Button(input_frame, text="Randomise", command=randomise_guid, width=50)
 randomise_button.grid(row=2, column=0, sticky="ew", pady=(10, 0), padx=(0, 5))
 
 
@@ -109,7 +109,7 @@ def apply_guid():
     return
 
 
-apply_button = Button(input_frame, text="Apply", command=apply_guid)
+apply_button = Button(input_frame, text="Apply", command=apply_guid, width=50)
 apply_button.grid(row=2, column=1, sticky="ew", pady=(10, 0), padx=(5, 0))
 
 window.mainloop()
