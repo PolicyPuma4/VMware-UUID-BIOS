@@ -3,6 +3,7 @@
 
 from tkinter import *
 import os
+import config
 
 window = Tk()
 
@@ -45,31 +46,40 @@ def on_select(event):
         if os.path.isfile(value):
             with open(value, "r", encoding="utf-8") as file:
                 for line in file.readlines():
-                    if line.startswith("uuid.bios = \"") and line.endswith("\"\n"):
-                        guid = line.removeprefix("uuid.bios = \"").removesuffix("\"\n")
+                    if line.startswith('uuid.bios = "') and line.endswith('"\n'):
+                        guid = line.removeprefix('uuid.bios = "').removesuffix('"\n')
                         entry.delete(0, END)
                         entry.insert(0, guid)
         return
 
 
-listbox.bind('<<ListboxSelect>>', on_select)
+listbox.bind("<<ListboxSelect>>", on_select)
+
+virtual_machines_location = config.get_default_location()
 
 
 def refresh_virtual_machines():
     listbox.delete(0, END)
     if os.name == "nt":
         import ctypes.wintypes
+
         CSIDL_PERSONAL = 5
         SHGFP_TYPE_CURRENT = 0
         buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-        ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
+        ctypes.windll.shell32.SHGetFolderPathW(
+            None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf
+        )
         documents_path = buf.value
-        if os.path.isdir(f"""{documents_path}\\Virtual Machines"""):
-            for directory in os.listdir(f"{documents_path}\\Virtual Machines"):
-                if os.path.isdir(f"{documents_path}\\Virtual Machines\\{directory}"):
-                    for filename in os.listdir(f"{documents_path}\\Virtual Machines\\{directory}"):
+        if os.path.isdir(virtual_machines_location):
+            for directory in os.listdir(virtual_machines_location):
+                directory_path = os.path.join(virtual_machines_location, directory)
+                if os.path.isdir(directory_path):
+                    for filename in os.listdir(directory_path):
                         if filename.endswith(".vmx"):
-                            listbox.insert(END, f"{documents_path}\\Virtual Machines\\{directory}\\{filename}")
+                            listbox.insert(
+                                END,
+                                os.path.join(directory_path, filename),
+                            )
     return
 
 
@@ -91,15 +101,18 @@ entry.grid(row=1, column=0, sticky="ew", columnspan=2)
 
 def randomise_guid():
     import uuid
+
     string = f"{uuid.uuid4()}".replace("-", "")
-    string = ' '.join(string[i:i + 2] for i in range(0, len(string), 2))
+    string = " ".join(string[i : i + 2] for i in range(0, len(string), 2))
     string = f"{string[:len(string) // 2]}-{string[(len(string) // 2) + 1:]}"
     entry.delete(0, END)
     entry.insert(0, string)
     return
 
 
-randomise_button = Button(input_frame, text="Randomise", command=randomise_guid, width=50)
+randomise_button = Button(
+    input_frame, text="Randomise", command=randomise_guid, width=50
+)
 randomise_button.grid(row=2, column=0, sticky="ew", pady=(10, 0), padx=(0, 5))
 
 
@@ -110,9 +123,13 @@ def apply_guid():
             replacement = ""
             with open(selection, "r") as file:
                 for line in file.readlines():
-                    if not line.startswith("uuid.bios = \"") and not line.startswith("uuid.action = \""):
+                    if not line.startswith('uuid.bios = "') and not line.startswith(
+                        'uuid.action = "'
+                    ):
                         replacement = f"{replacement}{line}"
-            replacement = f"{replacement}uuid.bios = \"{entry.get()}\"\nuuid.action = \"keep\"\n"
+            replacement = (
+                f'{replacement}uuid.bios = "{entry.get()}"\nuuid.action = "keep"\n'
+            )
             with open(selection, "w") as file:
                 file.write(replacement)
     return
