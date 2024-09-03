@@ -55,32 +55,14 @@ def on_select(event):
 
 listbox.bind("<<ListboxSelect>>", on_select)
 
-virtual_machines_location = config.get_default_location()
-
 
 def refresh_virtual_machines():
     listbox.delete(0, END)
-    if os.name == "nt":
-        import ctypes.wintypes
+    for machine in config.get_virtual_machines():
+        if not os.path.isfile(machine):
+            continue
 
-        CSIDL_PERSONAL = 5
-        SHGFP_TYPE_CURRENT = 0
-        buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-        ctypes.windll.shell32.SHGetFolderPathW(
-            None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf
-        )
-        documents_path = buf.value
-        if os.path.isdir(virtual_machines_location):
-            for directory in os.listdir(virtual_machines_location):
-                directory_path = os.path.join(virtual_machines_location, directory)
-                if os.path.isdir(directory_path):
-                    for filename in os.listdir(directory_path):
-                        if filename.endswith(".vmx"):
-                            listbox.insert(
-                                END,
-                                os.path.join(directory_path, filename),
-                            )
-    return
+        listbox.insert(END, machine)
 
 
 refresh_virtual_machines()
